@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import logo from '../../assets/images/logo.png';
 import logo2 from '../../assets/images/logo2.png';
 import EyeIcon from '../../assets/icons/EyeIcon';
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 // Lambda Function URLs
 const GET_ASSIGNED_URL = "https://7dlbphmvgv4ntjbeykilghonoa0aoeao.lambda-url.ap-south-1.on.aws/";
@@ -176,6 +178,32 @@ export default function CategorizerDashboard() {
         }
     };
 
+    const handleExport = () => {
+        try {
+            const exportData = candidates.map((c, index) => ({
+                "S.No": index + 1,
+                "Registration ID": c.registrationId,
+                "UDID": c.udid,
+                "Name": c.name,
+                "Mobile": c.mobile,
+                "District": c.district,
+                "Category": c.category || "Not Set",
+                "Status": c.category ? "Categorized" : "Pending"
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Categorized Candidates");
+            const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+            const data = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+            saveAs(data, `Categorizer_Report_${categorizerName}.xlsx`);
+            showToast('success', 'Report downloaded successfully!');
+        } catch (error) {
+            console.error("Export error:", error);
+            showToast('error', 'Failed to export report.');
+        }
+    };
+
     const handleLogout = () => {
         localStorage.removeItem('categorizerId');
         localStorage.removeItem('categorizerName');
@@ -215,40 +243,36 @@ export default function CategorizerDashboard() {
     }
 
     return (
-        <div className="w-full bg-white min-h-screen">
+        <div className="w-full min-h-screen bg-gray-50 font-poppins">
             {/* Header */}
-            <div className="flex items-center justify-center gap-3 sm:gap-6 md:gap-10 px-4 py-6 border-b">
-                <img src={logo} className="w-[100px] h-[90px] sm:w-[150px] sm:h-[130px]" alt="Logo 1" />
-                <h1 className="text-center font-poppins font-semibold text-[28px] sm:text-[40px] md:text-[50px] leading-[100%] tracking-[0.05em] text-[#0868CC]">
-                    Categorizer Portal
-                </h1>
-                <img src={logo2} className="w-[100px] h-[90px] sm:w-[150px] sm:h-[130px]" alt="Logo 2" />
-            </div>
-
-            {/* Info Bar */}
-            <div className="w-full px-4 md:px-12 py-4 bg-blue-50 border-b">
-                <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-                    <div>
-                        <h2 className="text-xl font-semibold text-[#0868CC]">
-                            Welcome, {categorizerName}
-                        </h2>
-                        <p className="text-gray-600 text-sm">
-                            Progress: {categorizedCount}/{candidates.length} categorized
-                        </p>
-                    </div>
-                    <div className="flex gap-3">
-                        <button
-                            onClick={fetchAssignedCandidates}
-                            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 text-sm"
-                        >
-                            Refresh
-                        </button>
-                        <button
-                            onClick={handleLogout}
-                            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 text-sm"
-                        >
-                            Logout
-                        </button>
+            <div className="bg-white shadow-sm sticky top-0 z-40">
+                <div className="max-w-7xl mx-auto px-4 md:px-12 py-4">
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                        <div className="flex items-center gap-4">
+                            <img src={logo} className="h-12 w-auto" alt="Logo" />
+                            <div>
+                                <h1 className="text-xl font-bold text-[#0868CC]">Categorizer Dashboard</h1>
+                                <p className="text-sm text-gray-600">Welcome, {categorizerName} ({categorizerId})</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <div className="bg-blue-50 px-4 py-2 rounded-lg border border-blue-100">
+                                <span className="text-sm text-gray-600">Progress: </span>
+                                <span className="font-bold text-[#0868CC]">{categorizedCount} / {candidates.length}</span>
+                            </div>
+                            <button
+                                onClick={handleExport}
+                                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm font-medium flex items-center gap-2"
+                            >
+                                Export Report
+                            </button>
+                            <button
+                                onClick={handleLogout}
+                                className="bg-red-50 text-red-600 px-4 py-2 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium"
+                            >
+                                Logout
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -317,7 +341,7 @@ export default function CategorizerDashboard() {
                                 key={currentCandidate.registrationId}
                                 src={currentCandidate.videoUrl.startsWith('http')
                                     ? currentCandidate.videoUrl
-                                    : `https://scd-event-registrations-videos.s3.ap-south-1.amazonaws.com/${currentCandidate.videoUrl}`}
+                                    : `https://scd-event-registrations-videos.s3.ap-south-1.amazonaws.com/${encodeURIComponent(currentCandidate.videoUrl)}`}
                                 controls
                                 className="w-full h-[400px] object-contain"
                                 onError={(e) => {
@@ -392,23 +416,25 @@ export default function CategorizerDashboard() {
             </div>
 
             {/* Toast Notification */}
-            {toast.open && (
-                <div className="fixed bottom-4 right-4 z-50">
-                    <div
-                        className={`max-w-sm rounded-lg shadow-lg px-4 py-3 flex items-start gap-3 ${toast.type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
-                            }`}
-                    >
-                        <div className="mt-0.5">{toast.type === 'success' ? '✅' : '⚠️'}</div>
-                        <div className="flex-1 text-sm">{toast.message}</div>
-                        <button
-                            onClick={() => setToast({ ...toast, open: false })}
-                            className="ml-2 text-white/80 hover:text-white text-lg leading-none"
+            {
+                toast.open && (
+                    <div className="fixed bottom-4 right-4 z-50">
+                        <div
+                            className={`max-w-sm rounded-lg shadow-lg px-4 py-3 flex items-start gap-3 ${toast.type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
+                                }`}
                         >
-                            ×
-                        </button>
+                            <div className="mt-0.5">{toast.type === 'success' ? '✅' : '⚠️'}</div>
+                            <div className="flex-1 text-sm">{toast.message}</div>
+                            <button
+                                onClick={() => setToast({ ...toast, open: false })}
+                                className="ml-2 text-white/80 hover:text-white text-lg leading-none"
+                            >
+                                ×
+                            </button>
+                        </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 }
