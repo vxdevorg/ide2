@@ -23,7 +23,7 @@ const categories = [
     "Creative Kavidhai",
     "Yoga",
     "Silambam",
-    "Speach",
+    "Speech",
     "Sports",
     "Others"
 ];
