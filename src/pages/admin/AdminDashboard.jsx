@@ -872,8 +872,8 @@ export default function AdminDashboard({ language = "English" }) {
               >
                 <option value="">Select a categorizer</option>
                 {categorizers.map(c => (
-                  <option key={c} value={c}>{c} - categorizer{c.slice(-1)}</option>
-                ))}
+                  <option key={c} value={c}>{c} - categorizer{parseInt(c.replace("CAT", ""), 10)}</option>
+                ))}
               </select>
             </div>
 
