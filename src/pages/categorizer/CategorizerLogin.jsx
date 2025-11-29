@@ -14,7 +14,8 @@ const CATEGORIZER_CREDENTIALS = {
     'categorizer7': { password: 'cat123pass7', id: 'CAT007' },
     'categorizer8': { password: 'cat123pass8', id: 'CAT008' },
     'categorizer9': { password: 'cat123pass9', id: 'CAT009' },
-    'categorizer10': { password: 'cat123pass10', id: 'CAT010' }
+    'categorizer10': { password: 'cat123pass10', id: 'CAT010' },
+    'categorizer11': { password: 'cat123pass10', id: 'CAT011' }
 };
 
 export default function CategorizerLogin() {
