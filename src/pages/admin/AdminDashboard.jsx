@@ -507,7 +507,6 @@ export default function AdminDashboard({ language = "English" }) {
               <p className="text-sm text-gray-700 leading-relaxed">
                 <strong className="font-semibold">Data Status: </strong>
                 Total: {tableData.length} |
-                Shortlisted: {tableData.filter(item => item.is_shortlisted).length} |
                 Assigned: {tableData.filter(item => item.assignedto !== "Not Assigned").length} |
                 Filtered: {filteredRows.length}
               </p>
