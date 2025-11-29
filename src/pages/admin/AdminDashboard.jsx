@@ -638,6 +638,9 @@ export default function AdminDashboard({ language = "English" }) {
               <option value="Mimicry">Mimicry</option>
               <option value="Creative Kavidhai">Creative Kavidhai</option>
               <option value="Yoga">Yoga</option>
+              <option value="Silambam">Silambam</option>
+              <option value="Speech">Speech</option>
+              <option value="Sports">Sports</option>
               <option value="Others">Others</option>
             </select>
 
