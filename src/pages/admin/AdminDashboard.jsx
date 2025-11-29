@@ -34,7 +34,7 @@ export default function AdminDashboard({ language = "English" }) {
   const ASSIGN_CATEGORIZER_URL = "https://ihazg24l2txm7tfcmoqvrbcwaa0onjlo.lambda-url.ap-south-1.on.aws/";
 
   const judges = ["Judge 1", "Judge 2", "Judge 3", "Judge 4", "Judge 5", "Judge 6"];
-  const categorizers = ["CAT001", "CAT002", "CAT003", "CAT004", "CAT005", "CAT006", "CAT007", "CAT008", "CAT009", "CAT010"];
+  const categorizers = ["CAT001", "CAT002", "CAT003", "CAT004", "CAT005", "CAT006", "CAT007", "CAT008", "CAT009", "CAT010", "CAT011"];
 
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
