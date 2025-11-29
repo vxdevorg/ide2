@@ -24,7 +24,7 @@ export default function JudgeDashboard({ language = "English" }) {
 
     const t = text[language];
     const judgeId = localStorage.getItem("judgeId") || "123451";
-    const judgeName = `Judge ${judgeId ? judgeId.slice(-1) : "1"}`;
+    const judgeName = `Judge ${judgeId ? parseInt(judgeId) - 123450 : "1"}`;
     const LOCAL_ACTIONS_KEY = `judgeActions_${judgeId}`;
 
     const [tableData, setTableData] = useState([]);
@@ -143,6 +143,7 @@ export default function JudgeDashboard({ language = "English" }) {
                     age: candidate.age || "N/A",
                     district: candidate.district || "N/A",
                     videoUrl: candidate.videoUrl || candidate.videoS3Key || "",
+                    category: candidate.category || "Not Set",
                 }));
 
             console.log(`✅ Found ${assigned.length} assigned candidates for ${judgeName}`);
@@ -160,7 +161,7 @@ export default function JudgeDashboard({ language = "English" }) {
     // OPEN CATEGORY SELECTION MODAL
     const handleShortlistClick = (candidate) => {
         setSelectedCandidate(candidate);
-        setSelectedCategory("");
+        setSelectedCategory(candidate.category || "Not Set");
         setShowCategoryModal(true);
     };
 
@@ -419,7 +420,7 @@ export default function JudgeDashboard({ language = "English" }) {
             <div className="w-full px-4 md:px-12 mb-8">
                 <div className="overflow-x-auto rounded-[10px] border border-gray-200">
                     <div className="bg-[#0868CC80] min-w-[1000px]">
-                        <div className="grid grid-cols-10 gap-2 py-4 px-4 text-white font-semibold">
+                        <div className="grid grid-cols-[50px_1.5fr_1.5fr_1.2fr_0.8fr_0.6fr_1.2fr_1.2fr_1fr_1fr_1fr] gap-2 py-4 px-4 text-white font-semibold">
                             <div className="text-center">S.no</div>
                             <div className="text-center">UDID</div>
                             <div className="text-center">Name</div>
@@ -427,6 +428,7 @@ export default function JudgeDashboard({ language = "English" }) {
                             <div className="text-center">Gender</div>
                             <div className="text-center">Age</div>
                             <div className="text-center">District</div>
+                            <div className="text-center">Category</div>
                             <div className="text-center">Video Preview</div>
                             <div className="text-center">Shortlist</div>
                             <div className="text-center">Reject</div>
@@ -440,7 +442,7 @@ export default function JudgeDashboard({ language = "English" }) {
                             return (
                                 <div
                                     key={row.registrationId}
-                                    className={`grid grid-cols-10 gap-2 py-4 px-4 items-center text-center bg-[#F8F6F6] ${index === filteredRows.length - 1 ? "" : "border-b border-gray-300"
+                                    className={`grid grid-cols-[50px_1.5fr_1.5fr_1.2fr_0.8fr_0.6fr_1.2fr_1.2fr_1fr_1fr_1fr] gap-2 py-4 px-4 items-center text-center bg-[#F8F6F6] ${index === filteredRows.length - 1 ? "" : "border-b border-gray-300"
                                         }`}
                                 >
                                     <div className="text-sm">{row.sno}</div>
@@ -450,6 +452,7 @@ export default function JudgeDashboard({ language = "English" }) {
                                     <div>{row.gender}</div>
                                     <div>{row.age}</div>
                                     <div className="text-sm">{row.district}</div>
+                                    <div className="text-sm font-medium text-purple-600">{row.category}</div>
 
                                     <div
                                         className="group flex items-center justify-center gap-2 px-2 py-1 rounded-lg cursor-pointer hover:bg-[#0868CC] hover:text-white transition-all"
@@ -532,7 +535,7 @@ export default function JudgeDashboard({ language = "English" }) {
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
                     <div className="bg-white rounded-[20px] p-6 w-full max-w-[500px] relative">
                         <div className="flex justify-between mb-4">
-                            <h2 className="text-[22px] font-semibold text-[#0868CC]">Select Category</h2>
+                            <h2 className="text-[22px] font-semibold text-[#0868CC]">Confirm Shortlist</h2>
                             <button
                                 onClick={() => setShowCategoryModal(false)}
                                 className="text-[28px] font-bold text-gray-600 hover:text-gray-800 transition-colors"
@@ -543,22 +546,11 @@ export default function JudgeDashboard({ language = "English" }) {
 
                         <div className="mb-6">
                             <p className="text-gray-700 mb-4">
-                                Select category for <strong>{selectedCandidate?.name}</strong>:
+                                Are you sure you want to shortlist <strong>{selectedCandidate?.name}</strong>?
                             </p>
-
-                            <div className="grid grid-cols-2 gap-3">
-                                {categories.map(category => (
-                                    <button
-                                        key={category}
-                                        onClick={() => setSelectedCategory(category)}
-                                        className={`p-3 rounded-lg border-2 text-sm font-medium transition-all ${selectedCategory === category
-                                            ? 'bg-[#0868CC] text-white border-[#0868CC]'
-                                            : 'bg-white text-gray-700 border-gray-300 hover:border-[#0868CC]'
-                                            }`}
-                                    >
-                                        {category}
-                                    </button>
-                                ))}
+                            <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                                <p className="text-sm text-gray-600 mb-1">Category:</p>
+                                <p className="text-lg font-bold text-[#0868CC]">{selectedCategory}</p>
                             </div>
                         </div>
 
@@ -571,13 +563,9 @@ export default function JudgeDashboard({ language = "English" }) {
                             </button>
                             <button
                                 onClick={handleShortlistWithCategory}
-                                disabled={!selectedCategory}
-                                className={`px-4 py-2 rounded-lg text-white ${selectedCategory
-                                    ? 'bg-green-600 hover:bg-green-700'
-                                    : 'bg-gray-400 cursor-not-allowed'
-                                    }`}
+                                className="px-4 py-2 rounded-lg text-white bg-green-600 hover:bg-green-700"
                             >
-                                Shortlist
+                                Confirm Shortlist
                             </button>
                         </div>
                     </div>
